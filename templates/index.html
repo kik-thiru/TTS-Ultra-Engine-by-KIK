@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TTS Engine For Free</title>
+  <style>
+    * { box-sizing: border-box; font-family: Arial, sans-serif; }
+    body { background-color: blue; color: yellow; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; overflow-x: hidden; }
+    
+    /* Splash Screen Styling */
+    #splashOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #000000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      transition: transform 0.8s ease-in-out, opacity 0.8s ease-in-out;
+    }
+
+    .poster-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .poster-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .get-started-btn {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #0066ff;
+      color: #ffffff;
+      padding: 12px 28px;
+      font-size: 18px;
+      font-weight: bold;
+      border: 2px solid #ffffff;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0, 102, 255, 0.6);
+      transition: all 0.3s ease;
+      outline: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .get-started-btn:hover {
+      background-color: #0044cc;
+      transform: translateX(-50%) scale(1.05);
+      box-shadow: 0 6px 20px rgba(0, 102, 255, 0.9);
+    }
+
+    .get-started-btn:focus {
+      outline: 3px solid #ffff00;
+    }
+
+    .arrow-icon {
+      font-size: 20px;
+    }
+
+    .zoom-out-hide {
+      transform: scale(0);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Main UI Container */
+    .container { background: #111; padding: 30px; border-radius: 12px; border: 1px solid #333; width: 100%; max-width: 650px; }
+    h1 { text-align: center; font-size: 24px; margin-bottom: 5px; }
+    .subtitle { text-align: center; font-size: 13px; color: #888; margin-top: 0; margin-bottom: 20px; font-weight: normal; }
+    .subtitle span { color: #fff; font-weight: bold; }
+    
+    .shortcut-box { background: #1a1a1a; border: 1px solid #444; border-radius: 6px; padding: 10px 15px; margin-bottom: 20px; font-size: 13px; color: #ccc; }
+    .shortcut-content { margin-top: 10px; display: none; line-height: 1.8; border-top: 1px solid #333; padding-top: 8px; font-size: 13px; color: #bbb; }
+    .shortcut-content div:focus { outline: 2px solid #ffff00; background-color: #262626; padding: 2px 5px; border-radius: 4px; color: #fff; }
+    
+    .form-group { margin-bottom: 20px; }
+    .label-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    label { font-size: 14px; color: #ccc; display: block; margin-bottom: 6px; }
+    .small-btn { background-color: #333; color: #fff; padding: 5px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; border: 1px solid #555; }
+    .small-btn:hover { background-color: #444; }
+    .preview-btn-container { text-align: right; margin-top: 8px; }
+    
+    input[type="file"] { display: none; }
+    select, textarea { width: 100%; padding: 12px; background-color: #222; color: #fff; border: 1px solid #444; border-radius: 6px; font-size: 16px; outline: none; }
+    textarea { height: 180px; resize: vertical; }
+    
+    /* Vertical Stack for Sliders */
+    .slider-column { display: flex; flex-direction: column; gap: 15px; }
+    .slider-container { width: 100%; }
+    .slider-val { font-size: 12px; color: #888; float: right; }
+    .control-box { display: flex; align-items: center; gap: 8px; margin-top: 5px; }
+    .control-box input[type="range"] { flex: 1; padding: 5px; accent-color: #ff0000; background-color: #222; border: 1px solid #444; border-radius: 6px; outline: none; }
+    .pm-btn { background-color: #333; color: #fff; border: 1px solid #555; border-radius: 4px; width: 32px; height: 32px; font-size: 18px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; user-select: none; }
+    .pm-btn:hover { background-color: #444; }
+
+    .convert-btn { width: 50%; display: block; margin: 0 auto; padding: 15px; background-color: #ffff00; color: #000000; border: none; border-radius: 6px; font-size: 18px; font-weight: bold; cursor: pointer; }
+    .convert-btn:focus { outline: 3px solid #ffffff; }
+    
+    #resultSection { margin-top: 25px; padding: 15px; background: #1a1a1a; border: 1px solid #444; border-radius: 8px; text-align: center; display: none; }
+    #resultSection audio { width: 100%; margin-bottom: 12px; }
+    .download-btn { display: inline-block; padding: 12px 24px; background-color: #3399ff; color: #000000; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px; border: none; cursor: pointer; }
+    .download-btn:hover { background-color: #2678cc; }
+
+    /* Footer Contact Section */
+    .footer-contact {
+      text-align: center;
+      margin-top: 30px;
+      padding-top: 15px;
+      border-top: 1px solid #333;
+      color: #aaa;
+      font-size: 13px;
+    }
+    .footer-contact a {
+      color: #3399ff;
+      text-decoration: none;
+    }
+    .footer-contact a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Splash Screen Section -->
+  <div id="splashOverlay">
+    <div class="poster-container">
+      <img src="{{ url_for('static', filename='front_end_poster.png') }}" alt="Application Poster" class="poster-img">
+      <button type="button" class="get-started-btn" id="startBtn" onclick="closeSplash()">
+        <span class="arrow-icon">&#10140;</span> Get Started
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Container with Accessibility Control -->
+  <div class="container" id="mainContainer" aria-hidden="true">
+    <h1>TTS Engine For Free</h1>
+    <p class="subtitle">by <span>KIK</span></p>
+    
+    <!-- Shortcut Keys List -->
+    <div class="shortcut-box">
+      <button type="button" class="shortcut-header" id="shortcutToggleBtn" aria-expanded="false" aria-controls="shortcutContent" onclick="toggleShortcuts()" style="background:none; border:none; color:#ff0; font-weight:bold; width:100%; text-align:left; cursor:pointer; padding:0; font-size:13px;" tabindex="-1">
+        <span>Shortcut Keys List (Press Shift+Alt+E to Expand / Shift+Alt+C to Collapse)</span>
+        <span id="toggleIcon">▼</span>
+      </button>
+      <div id="shortcutContent" class="shortcut-content" role="region" aria-live="polite" style="display: none;">
+        <div tabindex="-1">• <b>Increase Speed:</b> Control + I</div>
+        <div tabindex="-1">• <b>Decrease Speed:</b> Control + D</div>
+        <div tabindex="-1">• <b>Increase Pitch:</b> Control + Shift + I</div>
+        <div tabindex="-1">• <b>Decrease Pitch:</b> Control + Shift + D</div>
+        <div tabindex="-1">• <b>Convert to MP3:</b> Control + Shift + K</div>
+        <div tabindex="-1">• <b>Download Audio File:</b> Control + Shift + G</div>
+        <div tabindex="-1">• <b>Play Sample Voice:</b> Alt + P</div>
+        <div tabindex="-1">• <b>Play/Pause Generated Audio:</b> Control + Alt + P</div>
+        <div tabindex="-1">• <b>Paste Text:</b> Alt + V</div>
+        <div tabindex="-1">• <b>Navigation:</b> Tab / Shift + Tab</div>
+      </div>
+    </div>
+    
+    <form id="ttsForm" onsubmit="handleConvert(event)">
+      <!-- 1. Select Language -->
+      <div class="form-group">
+        <label for="languageSelect">Select Language</label>
+        <select id="languageSelect" name="lang" required onchange="onLanguageChange()" tabindex="-1">
+          <option value="ta-IN">Tamil (India)</option>
+          <option value="ta-LK">Tamil (Sri Lanka)</option>
+          <option value="ta-SG">Tamil (Singapore)</option>
+          <option value="en-IN">English (India)</option>
+          <option value="en-US">English (US)</option>
+          <option value="hi-IN">Hindi (India)</option>
+          <option value="es-ES">Spanish (Spain)</option>
+          <option value="fr-FR">French (France)</option>
+          <option value="de-DE">German (Germany)</option>
+          <option value="te-IN">Telugu (India)</option>
+          <option value="ml-IN">Malayalam (India)</option>
+          <option value="kn-IN">Kannada (India)</option>
+          <option value="ur-IN">Urdu (India)</option>
+          <option value="or-IN">Odia (India)</option>
+          <option value="bn-IN">Bengali (India)</option>
+          <option value="gu-IN">Gujarati (India)</option>
+          <option value="mr-IN">Marathi (India)</option>
+          <option value="pa-IN">Punjabi (India)</option>
+          <option value="ne-NP">Nepali (Nepal)</option>
+          <option value="ar-SA">Arabic (Saudi Arabia)</option>
+          <option value="it-IT">Italian (Italy)</option>
+          <option value="pt-BR">Portuguese (Brazil)</option>
+          <option value="ja-JP">Japanese (Japan)</option>
+          <option value="zh-CN">Chinese (China)</option>
+        </select>
+      </div>
+
+      <!-- 2. Select Voice Gender -->
+      <div class="form-group">
+        <label for="genderSelect">Select Voice Gender</label>
+        <select id="genderSelect" name="gender" required onchange="onGenderChange()" onkeydown="onGenderKeydown()" tabindex="-1">
+          <option value="Female">Female</option>
+          <option value="Male">Male</option>
+        </select>
+      </div>
+
+      <!-- 3. Dynamic Specific Voice List -->
+      <div class="form-group" id="voiceGroupContainer" style="display: none;">
+        <label for="voiceIndexSelect">Select Specific Voice Variant</label>
+        <select id="voiceIndexSelect" name="voice_index" onchange="onVoiceVariantChange()" onkeydown="onVoiceVariantKeydown()" tabindex="-1">
+        </select>
+      </div>
+
+      <!-- Play Sample Voice Button -->
+      <div class="preview-btn-container form-group">
+        <button type="button" class="small-btn" onclick="playPreview()" tabindex="-1">▶ Play Voice Sample</button>
+      </div>
+
+      <!-- 4. Vertical Speech & Pitch Sliders -->
+      <div class="slider-column form-group">
+        <div class="slider-container">
+          <label for="speedSlider">Speed Rate <span id="speedVal" class="slider-val">0%</span></label>
+          <div class="control-box">
+            <button type="button" class="pm-btn" onclick="adjustSlider('speedSlider', -5)" tabindex="-1">-</button>
+            <input type="range" id="speedSlider" min="-50" max="50" value="0" oninput="updateControls()" tabindex="-1">
+            <button type="button" class="pm-btn" onclick="adjustSlider('speedSlider', 5)" tabindex="-1">+</button>
+          </div>
+          <input type="hidden" name="rate" id="rateInput" value="+0%">
+        </div>
+        <div class="slider-container">
+          <label for="pitchSlider">Pitch Adjustment <span id="pitchVal" class="slider-val">0Hz</span></label>
+          <div class="control-box">
+            <button type="button" class="pm-btn" onclick="adjustSlider('pitchSlider', -5)" tabindex="-1">-</button>
+            <input type="range" id="pitchSlider" min="-50" max="50" value="0" oninput="updateControls()" tabindex="-1">
+            <button type="button" class="pm-btn" onclick="adjustSlider('pitchSlider', 5)" tabindex="-1">+</button>
+          </div>
+          <input type="hidden" name="pitch" id="pitchInput" value="+0Hz">
+        </div>
+      </div>
+
+      <!-- 5. Text Input & Paste Button -->
+      <div class="form-group">
+        <div class="label-header">
+          <label for="textInput">Enter Your Text</label>
+          <button type="button" class="small-btn" onclick="pasteFromClipboard()" tabindex="-1">📋 Paste Text</button>
+        </div>
+        <textarea id="textInput" name="text" placeholder="Enter text here..." required tabindex="-1"></textarea>
+      </div>
+
+      <button type="submit" id="convertBtn" class="convert-btn" tabindex="-1">Convert to MP3</button>
+    </form>
+
+    <div id="resultSection" aria-hidden="true">
+      <label style="display:block; margin-bottom:8px; color:#fff; font-weight:bold;">Generated Audio Preview:</label>
+      <audio id="resultAudio" controls tabindex="-1"></audio>
+      <br>
+      <a id="downloadLink" class="download-btn" download="speech.mp3" tabindex="-1">⬇ Download Audio File</a>
+    </div>
+
+    <!-- Center Aligned Contact Footer -->
+    <div class="footer-contact">
+      For any further issues, contact this email: <a href="kikcomputerkge15@gmail.com">kikcomputerkge15@gmail.com</a>
+    </div>
+  </div>
+
+  <script>
+    let currentAudio = null;
+    let autoPreviewTimer = null;
+    let lastPlayedSignature = "";
+
+    const voiceCounts = {
+      'en-US': { 'Female': 3, 'Male': 3 },
+      'hi-IN': { 'Female': 2, 'Male': 1 },
+      'es-ES': { 'Female': 2, 'Male': 2 },
+      'fr-FR': { 'Female': 2, 'Male': 2 },
+      'de-DE': { 'Female': 2, 'Male': 2 },
+      'ta-IN': { 'Female': 1, 'Male': 1 },
+      'ta-LK': { 'Female': 1, 'Male': 1 },
+      'ta-SG': { 'Female': 1, 'Male': 1 },
+      'en-IN': { 'Female': 1, 'Male': 1 }
+    };
+
+    function closeSplash() {
+      const splash = document.getElementById('splashOverlay');
+      splash.classList.add('zoom-out-hide');
+      setTimeout(() => {
+        splash.style.display = 'none';
+      }, 800);
+
+      // Enable accessibility & focus for main container elements
+      const container = document.getElementById('mainContainer');
+      container.setAttribute('aria-hidden', 'false');
+
+      const focusableElements = container.querySelectorAll('button, select, input, textarea, a, [tabindex]');
+      focusableElements.forEach(el => {
+        if (el.getAttribute('tabindex') === '-1') {
+          el.removeAttribute('tabindex');
+        }
+      });
+
+      // Focus the first form element
+      document.getElementById('languageSelect').focus();
+    }
+
+    function updateControls() {
+      const speed = document.getElementById('speedSlider').value;
+      const pitch = document.getElementById('pitchSlider').value;
+      const rateVal = (speed >= 0 ? '+' : '') + speed + '%';
+      const pitchVal = (pitch >= 0 ? '+' : '') + pitch + 'Hz';
+      document.getElementById('speedVal').textContent = rateVal;
+      document.getElementById('pitchVal').textContent = pitchVal;
+      document.getElementById('rateInput').value = rateVal;
+      document.getElementById('pitchInput').value = pitchVal;
+    }
+
+    function adjustSlider(id, amount) {
+      const slider = document.getElementById(id);
+      let val = parseInt(slider.value) + amount;
+      if (val < parseInt(slider.min)) val = parseInt(slider.min);
+      if (val > parseInt(slider.max)) val = parseInt(slider.max);
+      slider.value = val;
+      updateControls();
+    }
+
+    function toggleShortcuts() {
+      const content = document.getElementById('shortcutContent');
+      const icon = document.getElementById('toggleIcon');
+      const btn = document.getElementById('shortcutToggleBtn');
+      
+      if (content.style.display === 'block') {
+        content.style.display = 'none';
+        icon.textContent = '▼';
+        btn.setAttribute('aria-expanded', 'false');
+      } else {
+        content.style.display = 'block';
+        icon.textContent = '▲';
+        btn.setAttribute('aria-expanded', 'true');
+      }
+    }
+
+    async function pasteFromClipboard() {
+      try {
+        const text = await navigator.clipboard.readText();
+        if (text) {
+          const textarea = document.getElementById('textInput');
+          textarea.value += text;
+          textarea.focus();
+        } else {
+          alert('Clipboard is empty or does not contain text.');
+        }
+      } catch (err) {
+        alert('Unable to paste. Please grant clipboard permission when prompted.');
+      }
+    }
+
+    function triggerAutoPreview() {
+      if (autoPreviewTimer) clearTimeout(autoPreviewTimer);
+      
+      const lang = document.getElementById('languageSelect').value;
+      const gender = document.getElementById('genderSelect').value;
+      const voiceIndex = document.getElementById('voiceIndexSelect').value;
+      const currentSignature = `${lang}_${gender}_${voiceIndex}`;
+
+      if (currentSignature === lastPlayedSignature) return;
+
+      autoPreviewTimer = setTimeout(() => {
+        playPreview(true);
+      }, 2000);
+    }
+
+    function onLanguageChange() {
+      checkAndBuildVoiceVariants();
+    }
+
+    function onGenderChange() {
+      checkAndBuildVoiceVariants();
+      const container = document.getElementById('voiceGroupContainer');
+      if (container.style.display === 'none') {
+        triggerAutoPreview();
+      }
+    }
+
+    function onGenderKeydown() {
+      const container = document.getElementById('voiceGroupContainer');
+      if (container.style.display === 'none') {
+        triggerAutoPreview();
+      }
+    }
+
+    function onVoiceVariantChange() {
+      triggerAutoPreview();
+    }
+
+    function onVoiceVariantKeydown() {
+      triggerAutoPreview();
+    }
+
+    function checkAndBuildVoiceVariants() {
+      if (autoPreviewTimer) clearTimeout(autoPreviewTimer);
+      const lang = document.getElementById('languageSelect').value;
+      const gender = document.getElementById('genderSelect').value;
+      const container = document.getElementById('voiceGroupContainer');
+      const voiceSelect = document.getElementById('voiceIndexSelect');
+
+      voiceSelect.innerHTML = '';
+
+      const langMap = voiceCounts[lang] || { 'Female': 1, 'Male': 1 };
+      const count = langMap[gender] || 1;
+
+      if (count > 1) {
+        for (let i = 0; i < count; i++) {
+          let opt = document.createElement('option');
+          opt.value = i;
+          opt.textContent = `Voice ${i + 1} (Variant ${i + 1})`;
+          voiceSelect.appendChild(opt);
+        }
+        container.style.display = 'block';
+      } else {
+        let opt = document.createElement('option');
+        opt.value = 0;
+        opt.textContent = 'Default Voice';
+        voiceSelect.appendChild(opt);
+        container.style.display = 'none';
+      }
+    }
+
+    window.onload = function() {
+      document.getElementById('languageSelect').value = 'ta-IN';
+      document.getElementById('genderSelect').value = 'Female';
+      document.getElementById('speedSlider').value = 0;
+      document.getElementById('pitchSlider').value = 0;
+      updateControls();
+      checkAndBuildVoiceVariants();
+      
+      // Ensure focus starts strictly on Get Started button
+      document.getElementById('startBtn').focus();
+    };
+
+    async function handleConvert(event) {
+      event.preventDefault();
+      const btn = document.getElementById('convertBtn');
+      btn.disabled = true;
+      btn.textContent = "⏳ Converting...";
+
+      const formData = new FormData(document.getElementById('ttsForm'));
+
+      try {
+        const response = await fetch('/convert', { method: 'POST', body: formData });
+        if (response.ok) {
+          const blob = await response.blob();
+          const audioUrl = URL.createObjectURL(blob);
+          const audioPlayer = document.getElementById('resultAudio');
+          audioPlayer.src = audioUrl;
+          const downloadLink = document.getElementById('downloadLink');
+          downloadLink.href = audioUrl;
+
+          const resultSec = document.getElementById('resultSection');
+          resultSec.style.display = 'block';
+          resultSec.setAttribute('aria-hidden', 'false');
+          resultSec.scrollIntoView({ behavior: 'smooth' });
+        } else {
+          alert('Conversion failed. Please try again.');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('An error occurred.');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Convert to MP3";
+      }
+    }
+
+    async function playPreview(isAuto = false) {
+      if (autoPreviewTimer) clearTimeout(autoPreviewTimer);
+      
+      const lang = document.getElementById('languageSelect').value;
+      const gender = document.getElementById('genderSelect').value;
+      const voiceIndex = document.getElementById('voiceIndexSelect').value;
+      const rate = document.getElementById('rateInput').value;
+      const pitch = document.getElementById('pitchInput').value;
+
+      if (isAuto) {
+        lastPlayedSignature = `${lang}_${gender}_${voiceIndex}`;
+      }
+
+      const previewBtn = document.querySelector('.preview-btn-container .small-btn');
+      previewBtn.disabled = true;
+      previewBtn.textContent = "⏳ Loading...";
+
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio = null;
+      }
+
+      const formData = new FormData();
+      formData.append('lang', lang);
+      formData.append('gender', gender);
+      formData.append('voice_index', voiceIndex);
+      formData.append('rate', rate);
+      formData.append('pitch', pitch);
+
+      try {
+        const response = await fetch('/preview?' + new Date().getTime(), { method: 'POST', body: formData });
+        if (response.ok) {
+          const blob = await response.blob();
+          currentAudio = new Audio(URL.createObjectURL(blob));
+          currentAudio.play();
+          
+          currentAudio.onended = function() {
+            previewBtn.disabled = false;
+            previewBtn.textContent = "▶ Play Voice Sample";
+          };
+        } else {
+          alert('Preview generation failed.');
+          previewBtn.disabled = false;
+          previewBtn.textContent = "▶ Play Voice Sample";
+        }
+      } catch (err) {
+        console.error(err);
+        previewBtn.disabled = false;
+        previewBtn.textContent = "▶ Play Voice Sample";
+      }
+      
+      setTimeout(() => {
+        if (previewBtn.disabled) {
+          previewBtn.disabled = false;
+          previewBtn.textContent = "▶ Play Voice Sample";
+        }
+      }, 4000);
+    }
+
+    document.addEventListener('keydown', function(event) {
+      if (document.getElementById('splashOverlay').style.display !== 'none') return; // Ignore hotkeys until splash is closed
+
+      if (event.shiftKey && event.altKey && !event.ctrlKey && (event.key === 'e' || event.key === 'E')) {
+        event.preventDefault();
+        document.getElementById('shortcutContent').style.display = 'block';
+        document.getElementById('toggleIcon').textContent = '▲';
+        document.getElementById('shortcutToggleBtn').setAttribute('aria-expanded', 'true');
+      }
+      if (event.shiftKey && event.altKey && !event.ctrlKey && (event.key === 'c' || event.key === 'C')) {
+        event.preventDefault();
+        document.getElementById('shortcutContent').style.display = 'none';
+        document.getElementById('toggleIcon').textContent = '▼';
+        document.getElementById('shortcutToggleBtn').setAttribute('aria-expanded', 'false');
+      }
+      if (event.altKey && !event.ctrlKey && !event.shiftKey && (event.key === 'v' || event.key === 'V')) {
+        event.preventDefault();
+        pasteFromClipboard();
+      }
+      if (event.ctrlKey && !event.shiftKey && !event.altKey && (event.key === 'i' || event.key === 'I')) {
+        event.preventDefault();
+        adjustSlider('speedSlider', 5);
+      }
+      if (event.ctrlKey && !event.shiftKey && !event.altKey && (event.key === 'd' || event.key === 'D')) {
+        event.preventDefault();
+        adjustSlider('speedSlider', -5);
+      }
+      if (event.ctrlKey && event.shiftKey && !event.altKey && (event.key === 'I' || event.key === 'i')) {
+        event.preventDefault();
+        adjustSlider('pitchSlider', 5);
+      }
+      if (event.ctrlKey && event.shiftKey && !event.altKey && (event.key === 'D' || event.key === 'd')) {
+        event.preventDefault();
+        adjustSlider('pitchSlider', -5);
+      }
+      if (event.ctrlKey && event.shiftKey && (event.key === 'k' || event.key === 'K')) {
+        event.preventDefault();
+        document.getElementById('convertBtn').click();
+      }
+      if (event.ctrlKey && event.shiftKey && (event.key === 'g' || event.key === 'G')) {
+        event.preventDefault();
+        const downloadBtn = document.getElementById('downloadLink');
+        if (document.getElementById('resultSection').style.display !== 'none') {
+          downloadBtn.click();
+        }
+      }
+      if (event.altKey && !event.ctrlKey && (event.key === 'p' || event.key === 'P')) {
+        event.preventDefault();
+        playPreview(false);
+      }
+      if (event.ctrlKey && event.altKey && (event.key === 'p' || event.key === 'P')) {
+        const audioPlayer = document.getElementById('resultAudio');
+        if (document.getElementById('resultSection').style.display !== 'none' && audioPlayer.src) {
+          event.preventDefault();
+          if (audioPlayer.paused) {
+            audioPlayer.play();
+          } else {
+            audioPlayer.pause
