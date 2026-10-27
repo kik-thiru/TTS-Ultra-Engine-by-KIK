@@ -39,6 +39,7 @@
       object-fit: contain;
     }
 
+    /* Blue "Get Started" Button with Arrow at Bottom Center */
     .get-started-btn {
       position: absolute;
       bottom: 30px;
@@ -74,6 +75,7 @@
       font-size: 20px;
     }
 
+    /* Zoom Out Hide Class for Animation */
     .zoom-out-hide {
       transform: scale(0);
       opacity: 0;
@@ -92,7 +94,7 @@
     
     .form-group { margin-bottom: 20px; }
     .label-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    label { font-size: 14px; color: #ccc; display: block; margin-bottom: 6px; }
+    label { font-size: 14px; color: #ccc; }
     .small-btn { background-color: #333; color: #fff; padding: 5px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; border: 1px solid #555; }
     .small-btn:hover { background-color: #444; }
     .preview-btn-container { text-align: right; margin-top: 8px; }
@@ -101,9 +103,8 @@
     select, textarea { width: 100%; padding: 12px; background-color: #222; color: #fff; border: 1px solid #444; border-radius: 6px; font-size: 16px; outline: none; }
     textarea { height: 180px; resize: vertical; }
     
-    /* Vertical Stack for Sliders */
-    .slider-column { display: flex; flex-direction: column; gap: 15px; }
-    .slider-container { width: 100%; }
+    .slider-row { display: flex; gap: 15px; }
+    .slider-container { flex: 1; }
     .slider-val { font-size: 12px; color: #888; float: right; }
     .control-box { display: flex; align-items: center; gap: 8px; margin-top: 5px; }
     .control-box input[type="range"] { flex: 1; padding: 5px; accent-color: #ff0000; background-color: #222; border: 1px solid #444; border-radius: 6px; outline: none; }
@@ -111,29 +112,91 @@
     .pm-btn:hover { background-color: #444; }
 
     .convert-btn { width: 50%; display: block; margin: 0 auto; padding: 15px; background-color: #ffff00; color: #000000; border: none; border-radius: 6px; font-size: 18px; font-weight: bold; cursor: pointer; }
-    .convert-btn:focus { outline: 3px solid #ffffff; }
     
     #resultSection { margin-top: 25px; padding: 15px; background: #1a1a1a; border: 1px solid #444; border-radius: 8px; text-align: center; display: none; }
     #resultSection audio { width: 100%; margin-bottom: 12px; }
     .download-btn { display: inline-block; padding: 12px 24px; background-color: #3399ff; color: #000000; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px; border: none; cursor: pointer; }
     .download-btn:hover { background-color: #2678cc; }
 
-    /* Footer Contact Section */
-    .footer-contact {
-      text-align: center;
-      margin-top: 30px;
-      padding-top: 15px;
-      border-top: 1px solid #333;
-      color: #aaa;
+    /* Feedback Button & Modal Styling */
+    .feedback-btn {
+      background-color: #ff0000;
+      color: #ffffff;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
       font-size: 13px;
     }
-    .footer-contact a {
-      color: #3399ff;
-      text-decoration: none;
+    .feedback-btn:hover { background-color: #cc0000; }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
     }
-    .footer-contact a:hover {
-      text-decoration: underline;
+
+    .modal-box {
+      background: #1a1a1a;
+      border: 2px solid #444;
+      border-radius: 10px;
+      padding: 20px;
+      width: 90%;
+      max-width: 450px;
+      color: #fff;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.5);
     }
+
+    .modal-box input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      background: #222;
+      border: 1px solid #444;
+      color: #fff;
+      border-radius: 5px;
+      margin-top: 5px;
+      margin-bottom: 15px;
+    }
+
+    .radio-group {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 15px;
+      font-size: 14px;
+      color: #ccc;
+    }
+
+    .send-main-btn {
+      background-color: #ff0000;
+      color: #ffffff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      width: 100%;
+      font-size: 15px;
+      display: none;
+      margin-top: 15px;
+    }
+
+    .close-modal-btn {
+      background: transparent;
+      color: #888;
+      border: none;
+      float: right;
+      font-size: 20px;
+      cursor: pointer;
+    }
+    .close-modal-btn:hover { color: #fff; }
   </style>
 </head>
 <body>
@@ -148,28 +211,27 @@
     </div>
   </div>
 
-  <!-- Main Container with Accessibility Control -->
-  <div class="container" id="mainContainer" aria-hidden="true">
+  <div class="container">
     <h1>TTS Engine For Free</h1>
     <p class="subtitle">by <span>KIK</span></p>
     
     <!-- Shortcut Keys List -->
     <div class="shortcut-box">
-      <button type="button" class="shortcut-header" id="shortcutToggleBtn" aria-expanded="false" aria-controls="shortcutContent" onclick="toggleShortcuts()" style="background:none; border:none; color:#ff0; font-weight:bold; width:100%; text-align:left; cursor:pointer; padding:0; font-size:13px;" tabindex="-1">
+      <button type="button" class="shortcut-header" id="shortcutToggleBtn" aria-expanded="false" aria-controls="shortcutContent" onclick="toggleShortcuts()" style="background:none; border:none; color:#ff0; font-weight:bold; width:100%; text-align:left; cursor:pointer; padding:0; font-size:13px;">
         <span>Shortcut Keys List (Press Shift+Alt+E to Expand / Shift+Alt+C to Collapse)</span>
         <span id="toggleIcon">▼</span>
       </button>
       <div id="shortcutContent" class="shortcut-content" role="region" aria-live="polite" style="display: none;">
-        <div tabindex="-1">• <b>Increase Speed:</b> Control + I</div>
-        <div tabindex="-1">• <b>Decrease Speed:</b> Control + D</div>
-        <div tabindex="-1">• <b>Increase Pitch:</b> Control + Shift + I</div>
-        <div tabindex="-1">• <b>Decrease Pitch:</b> Control + Shift + D</div>
-        <div tabindex="-1">• <b>Convert to MP3:</b> Control + Shift + K</div>
-        <div tabindex="-1">• <b>Download Audio File:</b> Control + Shift + G</div>
-        <div tabindex="-1">• <b>Play Sample Voice:</b> Alt + P</div>
-        <div tabindex="-1">• <b>Play/Pause Generated Audio:</b> Control + Alt + P</div>
-        <div tabindex="-1">• <b>Paste Text:</b> Alt + V</div>
-        <div tabindex="-1">• <b>Navigation:</b> Tab / Shift + Tab</div>
+        <div tabindex="0">• <b>Increase Speed:</b> Control + I</div>
+        <div tabindex="0">• <b>Decrease Speed:</b> Control + D</div>
+        <div tabindex="0">• <b>Increase Pitch:</b> Control + Shift + I</div>
+        <div tabindex="0">• <b>Decrease Pitch:</b> Control + Shift + D</div>
+        <div tabindex="0">• <b>Convert to MP3:</b> Control + Shift + K</div>
+        <div tabindex="0">• <b>Download Audio File:</b> Control + Shift + G</div>
+        <div tabindex="0">• <b>Play Sample Voice:</b> Alt + P</div>
+        <div tabindex="0">• <b>Play/Pause Generated Audio:</b> Control + Alt + P</div>
+        <div tabindex="0">• <b>Paste Text:</b> Alt + V</div>
+        <div tabindex="0">• <b>Navigation:</b> Tab / Shift + Tab</div>
       </div>
     </div>
     
@@ -177,7 +239,7 @@
       <!-- 1. Select Language -->
       <div class="form-group">
         <label for="languageSelect">Select Language</label>
-        <select id="languageSelect" name="lang" required onchange="onLanguageChange()" tabindex="-1">
+        <select id="languageSelect" name="lang" required onchange="onLanguageChange()">
           <option value="ta-IN">Tamil (India)</option>
           <option value="ta-LK">Tamil (Sri Lanka)</option>
           <option value="ta-SG">Tamil (Singapore)</option>
@@ -208,41 +270,41 @@
       <!-- 2. Select Voice Gender -->
       <div class="form-group">
         <label for="genderSelect">Select Voice Gender</label>
-        <select id="genderSelect" name="gender" required onchange="onGenderChange()" onkeydown="onGenderKeydown()" tabindex="-1">
+        <select id="genderSelect" name="gender" required onchange="onGenderChange()" onkeydown="onGenderKeydown()">
           <option value="Female">Female</option>
           <option value="Male">Male</option>
         </select>
       </div>
 
-      <!-- 3. Dynamic Specific Voice List -->
+      <!-- 3. Dynamic Specific Voice List (Voice 1, Voice 2...) -->
       <div class="form-group" id="voiceGroupContainer" style="display: none;">
         <label for="voiceIndexSelect">Select Specific Voice Variant</label>
-        <select id="voiceIndexSelect" name="voice_index" onchange="onVoiceVariantChange()" onkeydown="onVoiceVariantKeydown()" tabindex="-1">
+        <select id="voiceIndexSelect" name="voice_index" onchange="onVoiceVariantChange()" onkeydown="onVoiceVariantKeydown()">
         </select>
       </div>
 
       <!-- Play Sample Voice Button -->
       <div class="preview-btn-container form-group">
-        <button type="button" class="small-btn" onclick="playPreview()" tabindex="-1">▶ Play Voice Sample</button>
+        <button type="button" class="small-btn" onclick="playPreview()">▶ Play Voice Sample</button>
       </div>
 
-      <!-- 4. Vertical Speech & Pitch Sliders -->
-      <div class="slider-column form-group">
+      <!-- 4. Speed & Pitch Sliders -->
+      <div class="slider-row form-group">
         <div class="slider-container">
           <label for="speedSlider">Speed Rate <span id="speedVal" class="slider-val">0%</span></label>
           <div class="control-box">
-            <button type="button" class="pm-btn" onclick="adjustSlider('speedSlider', -5)" tabindex="-1">-</button>
-            <input type="range" id="speedSlider" min="-50" max="50" value="0" oninput="updateControls()" tabindex="-1">
-            <button type="button" class="pm-btn" onclick="adjustSlider('speedSlider', 5)" tabindex="-1">+</button>
+            <button type="button" class="pm-btn" onclick="adjustSlider('speedSlider', -5)">-</button>
+            <input type="range" id="speedSlider" min="-50" max="50" value="0" oninput="updateControls()">
+            <button type="button" class="pm-btn" onclick="adjustSlider('speedSlider', 5)">+</button>
           </div>
           <input type="hidden" name="rate" id="rateInput" value="+0%">
         </div>
         <div class="slider-container">
           <label for="pitchSlider">Pitch Adjustment <span id="pitchVal" class="slider-val">0Hz</span></label>
           <div class="control-box">
-            <button type="button" class="pm-btn" onclick="adjustSlider('pitchSlider', -5)" tabindex="-1">-</button>
-            <input type="range" id="pitchSlider" min="-50" max="50" value="0" oninput="updateControls()" tabindex="-1">
-            <button type="button" class="pm-btn" onclick="adjustSlider('pitchSlider', 5)" tabindex="-1">+</button>
+            <button type="button" class="pm-btn" onclick="adjustSlider('pitchSlider', -5)">-</button>
+            <input type="range" id="pitchSlider" min="-50" max="50" value="0" oninput="updateControls()">
+            <button type="button" class="pm-btn" onclick="adjustSlider('pitchSlider', 5)">+</button>
           </div>
           <input type="hidden" name="pitch" id="pitchInput" value="+0Hz">
         </div>
@@ -252,24 +314,48 @@
       <div class="form-group">
         <div class="label-header">
           <label for="textInput">Enter Your Text</label>
-          <button type="button" class="small-btn" onclick="pasteFromClipboard()" tabindex="-1">📋 Paste Text</button>
+          <button type="button" class="small-btn" onclick="pasteFromClipboard()">📋 Paste Text</button>
         </div>
-        <textarea id="textInput" name="text" placeholder="Enter text here..." required tabindex="-1"></textarea>
+        <textarea id="textInput" name="text" placeholder="Enter text here..." required></textarea>
       </div>
 
-      <button type="submit" id="convertBtn" class="convert-btn" tabindex="-1">Convert to MP3</button>
+      <button type="submit" id="convertBtn" class="convert-btn">Convert to MP3</button>
     </form>
 
-    <div id="resultSection" aria-hidden="true">
+    <div id="resultSection">
       <label style="display:block; margin-bottom:8px; color:#fff; font-weight:bold;">Generated Audio Preview:</label>
-      <audio id="resultAudio" controls tabindex="-1"></audio>
+      <audio id="resultAudio" controls></audio>
       <br>
-      <a id="downloadLink" class="download-btn" download="speech.mp3" tabindex="-1">⬇ Download Audio File</a>
+      <a id="downloadLink" class="download-btn" download="speech.mp3">⬇ Download Audio File</a>
     </div>
+    <br>
+    <br>
+    <div id="ContactSection">
+      <labe style="margin: auto; color: aqua; font-family: 'Times New Roman', Times, serif;">For Any Further Issuses or You want me to tell something use this box</labe>
+      <div style="text-align: right; margin-top: 10px;">
+        <button type="button" class="feedback-btn" onclick="openFeedbackModal()">Comments / Feedback</button>
+      </div>
+    </div>
+  </div>
 
-    <!-- Center Aligned Contact Footer -->
-    <div class="footer-contact">
-      For any further issues, contact this email: <a href="kikcomputerkge15@gmail.com">kikcomputerkge15@gmail.com</a>
+  <!-- Feedback Modal Popup -->
+  <div id="feedbackModal" class="modal-overlay">
+    <div class="modal-box">
+      <button type="button" class="close-modal-btn" onclick="closeFeedbackModal()">&times;</button>
+      <h3 style="margin-top:0; color:#ffff00;">Comments / Feedback</h3>
+      
+      <label for="feedbackName">Your Name (Optional):</label>
+      <input type="text" id="feedbackName" placeholder="Enter your name">
+
+      <div class="radio-group">
+        <label><input type="radio" name="personType" value="Normal Person" checked> Normal Person</label>
+        <label><input type="radio" name="personType" value="Differently Abled"> Differently Abled</label>
+      </div>
+
+      <label for="feedbackText">Enter Your Text Here:</label>
+      <textarea id="feedbackText" placeholder="Write your comments here..." style="height: 100px;" oninput="validateFeedbackText()"></textarea>
+
+      <button type="button" id="sendMainBtn" class="send-main-btn" onclick="submitFeedback()">Send to Main</button>
     </div>
   </div>
 
@@ -296,20 +382,6 @@
       setTimeout(() => {
         splash.style.display = 'none';
       }, 800);
-
-      // Enable accessibility & focus for main container elements
-      const container = document.getElementById('mainContainer');
-      container.setAttribute('aria-hidden', 'false');
-
-      const focusableElements = container.querySelectorAll('button, select, input, textarea, a, [tabindex]');
-      focusableElements.forEach(el => {
-        if (el.getAttribute('tabindex') === '-1') {
-          el.removeAttribute('tabindex');
-        }
-      });
-
-      // Focus the first form element
-      document.getElementById('languageSelect').focus();
     }
 
     function updateControls() {
@@ -434,6 +506,59 @@
       }
     }
 
+    /* Feedback Modal Functions */
+    function openFeedbackModal() {
+      document.getElementById('feedbackModal').style.display = 'flex';
+    }
+
+    function closeFeedbackModal() {
+      document.getElementById('feedbackModal').style.display = 'none';
+    }
+
+    function validateFeedbackText() {
+      const text = document.getElementById('feedbackText').value;
+      const sendBtn = document.getElementById('sendMainBtn');
+      if (text.trim().length > 0) {
+        sendBtn.style.display = 'block';
+      } else {
+        sendBtn.style.display = 'none';
+      }
+    }
+
+    async function submitFeedback() {
+      const name = document.getElementById('feedbackName').value;
+      const personType = document.querySelector('input[name="personType"]:checked').value;
+      const comment = document.getElementById('feedbackText').value;
+
+      const sendBtn = document.getElementById('sendMainBtn');
+      sendBtn.disabled = true;
+      sendBtn.textContent = "Please wait for some seconds...";
+
+      const formData = new FormData();
+      formData.append('name', name);
+      formData.append('person_type', personType);
+      formData.append('comment', comment);
+
+      try {
+        const response = await fetch('/send_feedback', { method: 'POST', body: formData });
+        if (response.ok) {
+          alert('Feedback sent successfully!');
+          document.getElementById('feedbackText').value = '';
+          document.getElementById('feedbackName').value = '';
+          validateFeedbackText();
+          closeFeedbackModal();
+        } else {
+          alert('Failed to send feedback.');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('An error occurred.');
+      } finally {
+        sendBtn.disabled = false;
+        sendBtn.textContent = "Send to Main";
+      }
+    }
+
     window.onload = function() {
       document.getElementById('languageSelect').value = 'ta-IN';
       document.getElementById('genderSelect').value = 'Female';
@@ -442,7 +567,6 @@
       updateControls();
       checkAndBuildVoiceVariants();
       
-      // Ensure focus starts strictly on Get Started button
       document.getElementById('startBtn').focus();
     };
 
@@ -464,10 +588,8 @@
           const downloadLink = document.getElementById('downloadLink');
           downloadLink.href = audioUrl;
 
-          const resultSec = document.getElementById('resultSection');
-          resultSec.style.display = 'block';
-          resultSec.setAttribute('aria-hidden', 'false');
-          resultSec.scrollIntoView({ behavior: 'smooth' });
+          document.getElementById('resultSection').style.display = 'block';
+          document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' });
         } else {
           alert('Conversion failed. Please try again.');
         }
@@ -540,8 +662,6 @@
     }
 
     document.addEventListener('keydown', function(event) {
-      if (document.getElementById('splashOverlay').style.display !== 'none') return; // Ignore hotkeys until splash is closed
-
       if (event.shiftKey && event.altKey && !event.ctrlKey && (event.key === 'e' || event.key === 'E')) {
         event.preventDefault();
         document.getElementById('shortcutContent').style.display = 'block';
@@ -582,7 +702,7 @@
         event.preventDefault();
         const downloadBtn = document.getElementById('downloadLink');
         if (document.getElementById('resultSection').style.display !== 'none') {
-          downloadBtn.click();
+          downloadLink.click();
         }
       }
       if (event.altKey && !event.ctrlKey && (event.key === 'p' || event.key === 'P')) {
@@ -596,4 +716,12 @@
           if (audioPlayer.paused) {
             audioPlayer.play();
           } else {
-            audioPlayer.pause
+            audioPlayer.pause();
+          }
+        }
+      }
+    });
+  </script>
+
+</body>
+</html>
