@@ -2,6 +2,9 @@ from flask import Flask, render_template, request, send_file
 import asyncio
 import edge_tts
 import os
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 app = Flask(__name__)
 
@@ -15,7 +18,6 @@ async def generate_audio(text, voice, rate, pitch, output_path):
 def index():
     return render_template('index.html')
 
-# அனைத்து மொழிகளுக்குமான சரியான மற்றும் முழுமையான எட்ஜ்-டிடிஎஸ் குரல் பெயர்கள்[cite: 2]
 voice_database = {
     'ta-IN': {
         'Female': ['ta-IN-PallaviNeural'],
@@ -156,6 +158,47 @@ def preview():
     except Exception as e:
         return str(e), 500
 
+@app.route('/send_feedback', methods=['POST'])
+def send_feedback():
+    try:
+        name = request.form.get('name', 'Not Provided')
+        person_type = request.form.get('person_type', 'Normal Person')
+        comment = request.form.get('comment', '')
+
+        if not comment.strip():
+            return "Comment cannot be empty", 400
+
+        sender_email = "kikcomputerkge15@gmail.com"
+        app_password = "qrzn eovg klwu hvak"  # உங்களது App Password
+        receiver_email = "kikcomputerkge15@gmail.com"
+        subject = "KIK TTS Ultra Engine Feedback Notification"
+
+        # மெயில் பாடி (Body) அமைப்பு
+        email_content = f"""
+New Feedback Received:
+
+Name: {name if name.strip() else 'Anonymous'}
+Category: {person_type}
+Comment: {comment}
+        """
+
+        msg = MIMEMultipart()
+        msg['From'] = sender_email
+        msg['To'] = receiver_email
+        msg['Subject'] = subject
+        msg.attach(MIMEText(email_content, 'plain'))
+
+        # SMTP மூலம் மெயில் அனுப்புதல்
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(sender_email, app_password.replace(" ", ""))
+        server.sendmail(sender_email, receiver_email, msg.as_string())
+        server.quit()
+
+        return "Feedback sent successfully to email", 200
+    except Exception as e:
+        print(f"Email Error: {str(e)}")
+        return str(e), 500
+
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(debug=True)
