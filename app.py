@@ -2,9 +2,7 @@ from flask import Flask, render_template, request, send_file
 import asyncio
 import edge_tts
 import os
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -61,7 +59,7 @@ voice_database = {
     'ur-IN': {'Female': ['ur-IN-UzmaNeural'], 'Male': ['ur-IN-AsadNeural']},
     'or-IN': {'Female': ['or-IN-SubhadraNeural'], 'Male': ['or-IN-KishoreNeural']},
     'bn-IN': {'Female': ['bn-IN-TanishaNeural'], 'Male': ['bn-IN-BashkarNeural']},
-    'gu-IN': {'Female': ['gu-IN-DhwaniNeural'], 'Male': ['gu-IN-NiranjanNeural']},
+    'gu-IN': {'Female': ['bn-IN-TanishaNeural', 'gu-IN-DhwaniNeural'], 'Male': ['gu-IN-NiranjanNeural']},
     'mr-IN': {'Female': ['mr-IN-AarohiNeural'], 'Male': ['mr-IN-ManoharNeural']},
     'pa-IN': {'Female': ['pa-IN-OjasviNeural'], 'Male': ['pa-IN-AnmolNeural']},
     'ne-NP': {'Female': ['ne-NP-HemkalaNeural'], 'Male': ['ne-NP-SagarNeural']},
@@ -161,44 +159,46 @@ def preview():
 @app.route('/send_feedback', methods=['POST'])
 def send_feedback():
     try:
-        name = request.form.get('name', 'Not Provided')
+        name = request.form.get('name', 'Anonymous')
         person_type = request.form.get('person_type', 'Normal Person')
         comment = request.form.get('comment', '')
 
         if not comment.strip():
             return "Comment cannot be empty", 400
 
-        sender_email = "kikcomputerkge15@gmail.com"
-        app_password = "qrzn eovg klwu hvak"  # உங்களது App Password
-        receiver_email = "kikcomputerkge15@gmail.com"
-        subject = "KIK TTS Ultra Engine Feedback Notification"
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        feedback_file = os.path.join(BASE_DIR, "feedback.txt")
+        
+        feedback_entry = f"--- Feedback ---\nDate & Time: {current_time}\nName: {name if name.strip() else 'Anonymous'}\nCategory: {person_type}\nComment: {comment}\n--------------------\n\n"
 
-        # மெயில் பாடி (Body) அமைப்பு
-        email_content = f"""
-New Feedback Received:
+        with open(feedback_file, "a", encoding="utf-8") as f:
+            f.write(feedback_entry)
 
-Name: {name if name.strip() else 'Anonymous'}
-Category: {person_type}
-Comment: {comment}
-        """
-
-        msg = MIMEMultipart()
-        msg['From'] = sender_email
-        msg['To'] = receiver_email
-        msg['Subject'] = subject
-        msg.attach(MIMEText(email_content, 'plain'))
-
-        # SMTP மூலம் மெயில் அனுப்புதல்
-        server = smtplib.SMTP('smtp.gmail.com', 587)
-        server.starttls()
-        server.login(sender_email, app_password.replace(" ", ""))
-        server.sendmail(sender_email, receiver_email, msg.as_string())
-        server.quit()
-
-        return "Feedback sent successfully to email", 200
+        return "Feedback saved successfully", 200
     except Exception as e:
-        print(f"Email Error: {str(e)}")
+        print(f"Feedback Error: {str(e)}")
         return str(e), 500
+
+@app.route('/view_feedback', methods=['GET', 'POST'])
+def view_feedback():
+    ADMIN_PASSWORD = "KIK/comkge@15"  # உங்களது ரகசிய பாஸ்வேர்ட்
+    logged_in = False
+    error = ""
+    content = ""
+
+    if request.method == 'POST':
+        password = request.form.get('password', '')
+        if password != ADMIN_PASSWORD:
+            error = "Wrong Password!"
+            logged_in = False
+        else:
+            logged_in = True
+            feedback_file = os.path.join(BASE_DIR, "feedback.txt")
+            if os.path.exists(feedback_file):
+                with open(feedback_file, "r", encoding="utf-8") as f:
+                    content = f.read()
+
+    return render_template('view_feedback.html', logged_in=logged_in, error=error, content=content)
 
 if __name__ == '__main__':
     app.run(debug=True)
