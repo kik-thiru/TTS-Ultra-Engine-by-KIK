@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Feedback History</title>
+    <style>
+        body { background-color: #111; color: #00ff00; font-family: Arial, sans-serif; padding: 20px; }
+        .login-box, .content-box { max-width: 800px; margin: 0 auto; background: #222; padding: 20px; border-radius: 8px; border: 1px solid #444; }
+        input[type="password"], input[type="text"] { width: 100%; padding: 10px; margin-top: 10px; margin-bottom: 15px; background: #111; color: #fff; border: 1px solid #555; border-radius: 4px; font-size: 16px; box-sizing: border-box; }
+        button { background: #ffff00; color: #000; padding: 10px 20px; border: none; font-weight: bold; cursor: pointer; border-radius: 4px; }
+        button:hover { background: #cccc00; }
+        pre { white-space: pre-wrap; word-wrap: break-word; color: #00ff00; font-size: 15px; line-height: 1.5; }
+        .error { color: #ff4444; margin-bottom: 10px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    {% if not logged_in %}
+    <div class="login-box" style="text-align: center; margin-top: 100px;">
+        <h2 style="color: #ffff00;">Admin Password Required</h2>
+        {% if error %}
+        <div class="error">{{ error }}</div>
+        {% endif %}
+        <form method="POST">
+            <input type="password" name="password" placeholder="Enter Admin Password" required autofocus>
+            <button type="submit">Login to View Feedback</button>
+        </form>
+    </div>
+    {% else %}
+    <div class="content-box">
+        <h2 style="color: #ffff00; text-align: center;">User Feedback & Comments History</h2>
+        <label style="color: #ccc;">Search / Find in Comments (Date, Name, Keywords):</label>
+        <input type="text" id="searchInput" onkeyup="searchFeedback()" placeholder="Type to search...">
+        <hr style="border-color: #444;">
+        <pre id="feedbackContent">{{ content if content else 'No feedback received yet.' }}</pre>
+    </div>
+    <script>
+        function searchFeedback() {
+            let input = document.getElementById('searchInput').value.toLowerCase();
+            let contentPre = document.getElementById('feedbackContent');
+            let originalText = `{{ content | safe }}`;
+            if (!input) {
+                contentPre.textContent = originalText;
+                return;
+            }
+            let blocks = originalText.split('--- Feedback ---');
+            let filtered = blocks.filter(b => b.toLowerCase().includes(input));
+            contentPre.textContent = filtered.join('--- Feedback ---');
+        }
+    </script>
+    {% endif %}
+
+</body>
+</html>
