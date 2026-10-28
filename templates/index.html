@@ -103,8 +103,8 @@
     select, textarea { width: 100%; padding: 12px; background-color: #222; color: #fff; border: 1px solid #444; border-radius: 6px; font-size: 16px; outline: none; }
     textarea { height: 180px; resize: vertical; }
     
-    .slider-row { display: flex; gap: 15px; }
-    .slider-container { flex: 1; }
+    /* Sliders stacked vertically (Speed Rate on top, Pitch on bottom) */
+    .slider-container { width: 100%; margin-bottom: 15px; }
     .slider-val { font-size: 12px; color: #888; float: right; }
     .control-box { display: flex; align-items: center; gap: 8px; margin-top: 5px; }
     .control-box input[type="range"] { flex: 1; padding: 5px; accent-color: #ff0000; background-color: #222; border: 1px solid #444; border-radius: 6px; outline: none; }
@@ -288,8 +288,8 @@
         <button type="button" class="small-btn" onclick="playPreview()">▶ Play Voice Sample</button>
       </div>
 
-      <!-- 4. Speed & Pitch Sliders -->
-      <div class="slider-row form-group">
+      <!-- 4. Speed & Pitch Sliders (Stacked Vertically) -->
+      <div class="form-group">
         <div class="slider-container">
           <label for="speedSlider">Speed Rate <span id="speedVal" class="slider-val">0%</span></label>
           <div class="control-box">
@@ -299,7 +299,8 @@
           </div>
           <input type="hidden" name="rate" id="rateInput" value="+0%">
         </div>
-        <div class="slider-container">
+        
+        <div class="slider-container" style="margin-top: 15px;">
           <label for="pitchSlider">Pitch Adjustment <span id="pitchVal" class="slider-val">0Hz</span></label>
           <div class="control-box">
             <button type="button" class="pm-btn" onclick="adjustSlider('pitchSlider', -5)">-</button>
