@@ -48,8 +48,8 @@
             <!-- தேடல் பகுதி (Search) -->
             <form method="GET" action="{{ url_for('view_feedback') }}" class="search-box">
                 <input type="hidden" name="password" value="{{ password }}">
-                <input type="text" name="search" value="{{ search or '' }}" placeholder="பெயர், கமெண்ட் அல்லது வகை தேட...">
-                <button type="submit">தேடு</button>
+                <input type="text" name="search" value="{{ search or '' }}" placeholder="Enter Name, Comment or  Category To Search...">
+                <button type="submit">Search</button>
             </form>
 
             <!-- கால அடிப்படையில் டெலீட் செய்யும் பகுதி (Time-based Delete) -->
@@ -57,20 +57,22 @@
                 <input type="hidden" name="password" value="{{ password }}">
                 <input type="hidden" name="action" value="delete_time">
                 <select name="time_filter" required style="padding: 8px;">
-                    <option value="" disabled selected>கால அளவு தேர்வு</option>
-                    <option value="1_hour">கடைசி 1 மணி நேரம்</option>
-                    <option value="24_hours">கடைசி 24 மணி நேரம்</option>
-                    <option value="7_days">கடைசி 7 நாட்கள்</option>
-                    <option value="30_days">கடைசி 30 நாட்கள்</option>
+                    <option value="" disabled selected>Input Time Values</option>
+                    <option value="30_minutes">Delete Last 30 Minutes Comments</option>
+                    <option value="1_hour">Delete Last 1 Hour Comments</option>
+                    <option value="24_hours">Delete Last 24 Hours Comments</option>
+                    <option value="7_days">Delete Last 7 Days Comments</option>
+                    <option value="30_days">Delete Last 30 Days Comments</option>
+                    <option value="60_days">Delete Last 60 Days Comments</option>
                 </select>
-                <button type="submit" class="btn-danger">நீக்கு</button>
+                <button type="submit" class="btn-danger">Delete</button>
             </form>
 
             <!-- Delete All Button -->
             <form method="POST" action="{{ url_for('view_feedback') }}" onsubmit="return confirm('எச்சரிக்கை! அனைத்து ஃபீட்பேக்குகளும் நிரந்தரமாக அழிக்கப்படும். தொடரவா?');" style="margin: 0;">
                 <input type="hidden" name="password" value="{{ password }}">
                 <input type="hidden" name="action" value="delete_all">
-                <button type="submit" class="btn-danger">அனைத்தையும் நீக்கு</button>
+                <button type="submit" class="btn-danger">Delete All</button>
             </form>
         </div>
 
@@ -78,11 +80,11 @@
         <table>
             <thead>
                 <tr>
-                    <th>தேதி / நேரம்</th>
-                    <th>பெயர்</th>
-                    <th>வகை (Category)</th>
-                    <th>கமெண்ட்</th>
-                    <th>செயல் (Action)</th>
+                    <th>Date / Time</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Comment</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -95,24 +97,24 @@
                         <td style="word-break: break-word; max-width: 300px;">{{ fb.comment }}</td>
                         <td style="white-space: nowrap;">
                             <!-- தனிப்பட்ட இன்டிவிஜுவல் டெலீட் பட்டன் -->
-                            <form method="POST" action="{{ url_for('view_feedback') }}" onsubmit="return confirm('இந்தக் கமெண்டை மட்டும் நீக்கவா?');" style="margin: 0;">
+                            <form method="POST" action="{{ url_for('view_feedback') }}" onsubmit="return confirm('You Want Delete This Comment Only?');" style="margin: 0;">
                                 <input type="hidden" name="password" value="{{ password }}">
                                 <input type="hidden" name="action" value="delete_one">
                                 <input type="hidden" name="feedback_id" value="{{ fb.id }}">
-                                <button type="submit" class="btn-danger" style="padding: 5px 10px; font-size: 12px;">நீக்கு</button>
+                                <button type="submit" class="btn-danger" style="padding: 5px 10px; font-size: 12px;">Delete</button>
                             </form>
                         </td>
                     </tr>
                     {% endfor %}
                 {% else %}
                     <tr>
-                        <td colspan="5" style="text-align: center; color: #888; padding: 30px;">ஃபீட்பேக்குகள் எதுவும் இல்லை.</td>
+                        <td colspan="5" style="text-align: center; color: #888; padding: 30px;">No Feedbacks Here.</td>
                     </tr>
                 {% endif %}
             </tbody>
         </table>
 
-        <a href="{{ url_for('index') }}" class="back-link">&larr; முகப்புப் பக்கத்திற்குச் செல்ல</a>
+        <a href="{{ url_for('index') }}" class="back-link">&larr; Go to Home Page</a>
     </div>
     {% endif %}
 
