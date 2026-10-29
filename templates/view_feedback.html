@@ -2,52 +2,118 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Feedback History</title>
+    <title>Admin Feedback Management</title>
     <style>
-        body { background-color: #111; color: #00ff00; font-family: Arial, sans-serif; padding: 20px; }
-        .login-box, .content-box { max-width: 800px; margin: 0 auto; background: #222; padding: 20px; border-radius: 8px; border: 1px solid #444; }
-        input[type="password"], input[type="text"] { width: 100%; padding: 10px; margin-top: 10px; margin-bottom: 15px; background: #111; color: #fff; border: 1px solid #555; border-radius: 4px; font-size: 16px; box-sizing: border-box; }
-        button { background: #ffff00; color: #000; padding: 10px 20px; border: none; font-weight: bold; cursor: pointer; border-radius: 4px; }
+        body { background-color: #111; color: #00ff00; font-family: Arial, sans-serif; padding: 20px; margin: 0; }
+        .login-box, .content-box { max-width: 1000px; margin: 0 auto; background: #222; padding: 20px; border-radius: 8px; border: 1px solid #444; }
+        input[type="password"], input[type="text"], select { padding: 10px; background: #111; color: #fff; border: 1px solid #555; border-radius: 4px; font-size: 14px; box-sizing: border-box; }
+        input[type="password"], input[type="text"]#searchInput { width: 100%; margin-top: 10px; margin-bottom: 15px; }
+        button { background: #ffff00; color: #000; padding: 8px 14px; border: none; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 14px; }
         button:hover { background: #cccc00; }
-        pre { white-space: pre-wrap; word-wrap: break-word; color: #00ff00; font-size: 15px; line-height: 1.5; }
+        .btn-danger { background-color: #ff4444; color: white; }
+        .btn-danger:hover { background-color: #cc0000; }
         .error { color: #ff4444; margin-bottom: 10px; font-weight: bold; }
+        
+        .controls-bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; background: #1a1a1a; padding: 15px; border-radius: 6px; border: 1px solid #333; }
+        .search-box { display: flex; gap: 8px; flex: 1; min-width: 250px; }
+        .search-box input { margin: 0 !important; flex: 1; }
+        .delete-control { display: flex; gap: 8px; align-items: center; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; border-bottom: 1px solid #444; text-align: left; font-size: 14px; color: #fff; }
+        th { background-color: #2a2a2a; color: #ffff00; }
+        .back-link { display: inline-block; margin-top: 20px; text-decoration: none; color: #ffff00; font-weight: bold; }
+        .back-link:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
 
     {% if not logged_in %}
-    <div class="login-box" style="text-align: center; margin-top: 100px;">
+    <div class="login-box" style="text-align: center; margin-top: 100px; max-width: 450px;">
         <h2 style="color: #ffff00;">Admin Password Required</h2>
         {% if error %}
         <div class="error">{{ error }}</div>
         {% endif %}
         <form method="POST">
             <input type="password" name="password" placeholder="Enter Admin Password" required autofocus>
-            <button type="submit">Login to View Feedback</button>
+            <button type="submit" style="width: 100%; padding: 12px;">Login to View Feedback</button>
         </form>
     </div>
     {% else %}
     <div class="content-box">
-        <h2 style="color: #ffff00; text-align: center;">User Feedback & Comments History</h2>
-        <label style="color: #ccc;">Search / Find in Comments (Date, Name, Keywords):</label>
-        <input type="text" id="searchInput" onkeyup="searchFeedback()" placeholder="Type to search...">
-        <hr style="border-color: #444;">
-        <pre id="feedbackContent">{{ content if content else 'No feedback received yet.' }}</pre>
+        <h2 style="color: #ffff00; text-align: center; margin-top: 0;">User Feedback & Comments History</h2>
+        
+        <!-- மேல் பகுதியில் Search மற்றும் Delete Controls -->
+        <div class="controls-bar">
+            <!-- தேடல் பகுதி (Search) -->
+            <form method="GET" action="{{ url_for('view_feedback') }}" class="search-box">
+                <input type="hidden" name="password" value="{{ password }}">
+                <input type="text" name="search" value="{{ search or '' }}" placeholder="பெயர், கமெண்ட் அல்லது வகை தேட...">
+                <button type="submit">தேடு</button>
+            </form>
+
+            <!-- கால அடிப்படையில் டெலீட் செய்யும் பகுதி (Time-based Delete) -->
+            <form method="POST" action="{{ url_for('view_feedback') }}" class="delete-control" onsubmit="return confirm('நிச்சயமாக இந்த கால அளவு கமெண்ட்களை நீக்க விரும்புகிறீர்களா?');">
+                <input type="hidden" name="password" value="{{ password }}">
+                <input type="hidden" name="action" value="delete_time">
+                <select name="time_filter" required style="padding: 8px;">
+                    <option value="" disabled selected>கால அளவு தேர்வு</option>
+                    <option value="1_hour">கடைசி 1 மணி நேரம்</option>
+                    <option value="24_hours">கடைசி 24 மணி நேரம்</option>
+                    <option value="7_days">கடைசி 7 நாட்கள்</option>
+                    <option value="30_days">கடைசி 30 நாட்கள்</option>
+                </select>
+                <button type="submit" class="btn-danger">நீக்கு</button>
+            </form>
+
+            <!-- Delete All Button -->
+            <form method="POST" action="{{ url_for('view_feedback') }}" onsubmit="return confirm('எச்சரிக்கை! அனைத்து ஃபீட்பேக்குகளும் நிரந்தரமாக அழிக்கப்படும். தொடரவா?');" style="margin: 0;">
+                <input type="hidden" name="password" value="{{ password }}">
+                <input type="hidden" name="action" value="delete_all">
+                <button type="submit" class="btn-danger">அனைத்தையும் நீக்கு</button>
+            </form>
+        </div>
+
+        <!-- ஃபீட்பேக் பட்டியல் அட்டவணை -->
+        <table>
+            <thead>
+                <tr>
+                    <th>தேதி / நேரம்</th>
+                    <th>பெயர்</th>
+                    <th>வகை (Category)</th>
+                    <th>கமெண்ட்</th>
+                    <th>செயல் (Action)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if feedbacks %}
+                    {% for fb in feedbacks %}
+                    <tr>
+                        <td style="white-space: nowrap;">{{ fb.created_at.strftime('%Y-%m-%d %H:%M') if fb.created_at else '' }}</td>
+                        <td><strong>{{ fb.name }}</strong></td>
+                        <td><span style="color: #00ffff; font-size: 12px; background: #333; padding: 3px 6px; border-radius: 4px;">{{ fb.person_type }}</span></td>
+                        <td style="word-break: break-word; max-width: 300px;">{{ fb.comment }}</td>
+                        <td style="white-space: nowrap;">
+                            <!-- தனிப்பட்ட இன்டிவிஜுவல் டெலீட் பட்டன் -->
+                            <form method="POST" action="{{ url_for('view_feedback') }}" onsubmit="return confirm('இந்தக் கமெண்டை மட்டும் நீக்கவா?');" style="margin: 0;">
+                                <input type="hidden" name="password" value="{{ password }}">
+                                <input type="hidden" name="action" value="delete_one">
+                                <input type="hidden" name="feedback_id" value="{{ fb.id }}">
+                                <button type="submit" class="btn-danger" style="padding: 5px 10px; font-size: 12px;">நீக்கு</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: #888; padding: 30px;">ஃபீட்பேக்குகள் எதுவும் இல்லை.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+
+        <a href="{{ url_for('index') }}" class="back-link">&larr; முகப்புப் பக்கத்திற்குச் செல்ல</a>
     </div>
-    <script>
-        function searchFeedback() {
-            let input = document.getElementById('searchInput').value.toLowerCase();
-            let contentPre = document.getElementById('feedbackContent');
-            let originalText = `{{ content | safe }}`;
-            if (!input) {
-                contentPre.textContent = originalText;
-                return;
-            }
-            let blocks = originalText.split('--- Feedback ---');
-            let filtered = blocks.filter(b => b.toLowerCase().includes(input));
-            contentPre.textContent = filtered.join('--- Feedback ---');
-        }
-    </script>
     {% endif %}
 
 </body>
