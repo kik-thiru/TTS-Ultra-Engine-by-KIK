@@ -1,8 +1,7 @@
 import asyncio
 from datetime import datetime, timedelta
 import os
-import edge_pss  # unused, kept clean
-import edge_tts
+import edge_tts  # edge_pss நீக்கப்பட்டுவிட்டது
 from flask import Flask, redirect, render_template, request, send_file, url_for
 import psycopg2
 import psycopg2.extras
