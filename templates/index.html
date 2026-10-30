@@ -217,10 +217,21 @@
     
     <!-- Shortcut Keys List -->
     <div class="shortcut-box">
-      <button type="button" class="shortcut-header" id="shortcutToggleBtn" aria-expanded="false" aria-controls="shortcutContent" onclick="toggleShortcuts()" style="background:none; border:none; color:#ff0; font-weight:bold; width:100%; text-align:left; cursor:pointer; padding:0; font-size:13px;">
-        <span>Shortcut Keys List (Press Shift+Alt+E to Expand / Shift+Alt+C to Collapse)</span>
-        <span id="toggleIcon">▼</span>
-      </button>
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <button type="button" class="shortcut-header" id="shortcutToggleBtn" aria-expanded="false" aria-controls="shortcutContent" onclick="toggleShortcuts()" style="background:none; border:none; color:#ff0; font-weight:bold; text-align:left; cursor:pointer; padding:0; font-size:13px; flex: 1;">
+          <span>Shortcut Keys List (Press Shift+Alt+E to Expand / Shift+Alt+C to Collapse)</span>
+          <span id="toggleIcon">▼</span>
+        </button>
+
+        <!-- Read Speaker Icon Button -->
+        <button type="button" onclick="toggleShortcutAudio()" title="Read" aria-label="ஷார்ட்கட் கீஸைக் கேளுங்கள்" style="background: none; border: none; cursor: pointer; font-size: 18px; padding: 0 5px; margin-left: 10px;" id="readShortcutBtn">
+          🔊
+        </button>
+      </div>
+
+      <!-- Hidden Audio Element for Shortcut Help -->
+      <audio id="shortcutAudio" src="{{ url_for('static', filename='audio/shortcuts_help.mp3') }}" preload="auto"></audio>
+
       <div id="shortcutContent" class="shortcut-content" role="region" aria-live="polite" style="display: none;">
         <div tabindex="0">• <b>Increase Speed:</b> Control + I</div>
         <div tabindex="0">• <b>Decrease Speed:</b> Control + D</div>
@@ -376,6 +387,15 @@
       'ta-SG': { 'Female': 1, 'Male': 1 },
       'en-IN': { 'Female': 1, 'Male': 1 }
     };
+
+    function toggleShortcutAudio() {
+      const audio = document.getElementById('shortcutAudio');
+      if (audio.paused) {
+        audio.play();
+      } else {
+        audio.pause();
+      }
+    }
 
     function closeSplash() {
       const splash = document.getElementById('splashOverlay');
@@ -701,7 +721,7 @@
       }
       if (event.ctrlKey && event.shiftKey && (event.key === 'g' || event.key === 'G')) {
         event.preventDefault();
-        const downloadBtn = document.getElementById('downloadLink');
+        const downloadLink = document.getElementById('downloadLink');
         if (document.getElementById('resultSection').style.display !== 'none') {
           downloadLink.click();
         }
