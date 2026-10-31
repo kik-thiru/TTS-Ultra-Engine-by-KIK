@@ -118,8 +118,8 @@
     .download-btn { display: inline-block; padding: 12px 24px; background-color: #3399ff; color: #000000; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px; border: none; cursor: pointer; }
     .download-btn:hover { background-color: #2678cc; }
 
-    /* Custom Audio Player Buttons Color Styling & Focus Ring */
-    .ctrl-btn { border: none; border-radius: 4px; font-weight: bold; cursor: pointer; padding: 6px 10px; font-size: 12px; display: flex; align-items: center; gap: 2px; }
+    /* Custom Audio Player Buttons Color Styling & Focus Ring (Compact for Mobile) */
+    .ctrl-btn { border: none; border-radius: 4px; font-weight: bold; cursor: pointer; padding: 6px 8px; font-size: 13px; display: flex; align-items: center; justify-content: center; }
     .ctrl-btn:focus { outline: 3px solid #ffff00; outline-offset: 2px; }
     .btn-10s { background-color: #0066ff; color: #ffffff; } /* Blue for 10s */
     .btn-5s { background-color: #00cc44; color: #ffffff; }  /* Green for 5s */
@@ -290,14 +290,14 @@
       <div style="font-size: 12px; color: #fff; margin-bottom: 8px; font-weight: bold;">Audio Controls Room: Ctrl+Shift+Space (Play/Pause), Ctrl+Shift (Rewind 5s/10s), Ctrl+Alt (Forward 5s/10s)</div>
       <div id="audioButtonGroup" style="display: flex; justify-content: center; align-items: center; gap: 6px; flex-wrap: wrap;">
         
-        <!-- 10s Rewind (Blue) -->
+        <!-- 10s Rewind (Blue) - Icon Only -->
         <button type="button" onclick="skipAudio(-10)" class="ctrl-btn btn-10s" title="Rewind 10s" aria-label="10 விநாடிகள் பின்னோக்கிச் செல்" id="rewind10Btn" tabindex="0">
-          ⏮ 10s
+          ⏮
         </button>
 
-        <!-- 5s Rewind (Green) -->
+        <!-- 5s Rewind (Green) - Icon Only -->
         <button type="button" onclick="skipAudio(-5)" class="ctrl-btn btn-5s" title="Rewind 5s" aria-label="5 விநாடிகள் பின்னோக்கிச் செல்" id="rewind5Btn" tabindex="0">
-          ⏪ 5s
+          ⏪
         </button>
 
         <!-- Play / Pause Center Button (Yellow / Red) -->
@@ -305,14 +305,14 @@
           <span id="playPauseIcon">▶ Play</span>
         </button>
 
-        <!-- 5s Forward (Green) -->
+        <!-- 5s Forward (Green) - Icon Only -->
         <button type="button" onclick="skipAudio(5)" class="ctrl-btn btn-5s" title="Forward 5s" aria-label="5 விநாடிகள் முன்னோக்கிச் செல்" id="forward5Btn" tabindex="0">
-          5s ⏩
+          ⏩
         </button>
 
-        <!-- 10s Forward (Blue) -->
+        <!-- 10s Forward (Blue) - Icon Only -->
         <button type="button" onclick="skipAudio(10)" class="ctrl-btn btn-10s" title="Forward 10s" aria-label="10 விநாடிகள் முன்னோக்கிச் செல்" id="forward10Btn" tabindex="0">
-          10s ⏭
+          ⏭
         </button>
 
       </div>
@@ -517,7 +517,6 @@
         const modal = document.getElementById('shortcutInfoModal');
         modal.style.display = 'flex';
         
-        // Focus on the modal title so screen reader starts reading line by line
         setTimeout(() => {
           document.getElementById('modalTitle').focus();
         }, 100);
