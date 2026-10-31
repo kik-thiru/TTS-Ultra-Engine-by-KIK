@@ -118,6 +118,76 @@
     .download-btn { display: inline-block; padding: 12px 24px; background-color: #3399ff; color: #000000; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px; border: none; cursor: pointer; }
     .download-btn:hover { background-color: #2678cc; }
 
+    /* Custom Audio Player Buttons Color Styling & Focus Ring */
+    .ctrl-btn { border: none; border-radius: 4px; font-weight: bold; cursor: pointer; padding: 6px 10px; font-size: 12px; display: flex; align-items: center; gap: 2px; }
+    .ctrl-btn:focus { outline: 3px solid #ffff00; outline-offset: 2px; }
+    .btn-10s { background-color: #0066ff; color: #ffffff; } /* Blue for 10s */
+    .btn-5s { background-color: #00cc44; color: #ffffff; }  /* Green for 5s */
+    .btn-play { background-color: #ffff00; color: #000000; } /* Yellow for Play */
+    .btn-pause { background-color: #ff0000; color: #ffffff; } /* Red for Pause */
+
+    /* Shortcut Help Info Modal Popup Styling */
+    .info-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.85);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 10001;
+    }
+
+    .info-modal-box {
+      background: #1a1a1a;
+      border: 2px solid #ffff00;
+      border-radius: 10px;
+      padding: 25px;
+      width: 90%;
+      max-width: 500px;
+      color: #fff;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.7);
+      outline: none;
+    }
+
+    .info-modal-box h3 {
+      margin-top: 0;
+      color: #ffff00;
+      text-align: center;
+    }
+
+    .info-modal-box p {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #fff;
+      margin: 10px 0;
+    }
+
+    .checkbox-container {
+      margin: 20px 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: #fff;
+    }
+
+    .close-info-btn {
+      background-color: #ffff00;
+      color: #000;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      width: 100%;
+      font-size: 16px;
+    }
+    .close-info-btn:hover { background-color: #e6e600; }
+    .close-info-btn:focus { outline: 3px solid #ff0000; outline-offset: 2px; }
+
     /* Feedback Button & Modal Styling */
     .feedback-btn {
       background-color: #ff0000;
@@ -214,6 +284,39 @@
   <div class="container">
     <h1>TTS Engine For Free</h1>
     <p class="subtitle">by <span>KIK</span></p>
+
+    <!-- TOP AUDIO CONTROLS -->
+    <div id="audioControlsContainer" style="display: none; margin-bottom: 12px; background: #222; padding: 12px; border-radius: 8px; border: 1px solid #555; text-align: center;">
+      <div style="font-size: 12px; color: #fff; margin-bottom: 8px; font-weight: bold;">Audio Controls Room: Ctrl+Shift+Space (Play/Pause), Ctrl+Shift (Rewind 5s/10s), Ctrl+Alt (Forward 5s/10s)</div>
+      <div id="audioButtonGroup" style="display: flex; justify-content: center; align-items: center; gap: 6px; flex-wrap: wrap;">
+        
+        <!-- 10s Rewind (Blue) -->
+        <button type="button" onclick="skipAudio(-10)" class="ctrl-btn btn-10s" title="Rewind 10s" aria-label="10 விநாடிகள் பின்னோக்கிச் செல்" id="rewind10Btn" tabindex="0">
+          ⏮ 10s
+        </button>
+
+        <!-- 5s Rewind (Green) -->
+        <button type="button" onclick="skipAudio(-5)" class="ctrl-btn btn-5s" title="Rewind 5s" aria-label="5 விநாடிகள் பின்னோக்கிச் செல்" id="rewind5Btn" tabindex="0">
+          ⏪ 5s
+        </button>
+
+        <!-- Play / Pause Center Button (Yellow / Red) -->
+        <button type="button" onclick="toggleShortcutAudio()" class="ctrl-btn btn-play" title="Play / Pause Audio" aria-label="Play or Pause Audio" id="mainPlayPauseBtn" tabindex="0">
+          <span id="playPauseIcon">▶ Play</span>
+        </button>
+
+        <!-- 5s Forward (Green) -->
+        <button type="button" onclick="skipAudio(5)" class="ctrl-btn btn-5s" title="Forward 5s" aria-label="5 விநாடிகள் முன்னோக்கிச் செல்" id="forward5Btn" tabindex="0">
+          5s ⏩
+        </button>
+
+        <!-- 10s Forward (Blue) -->
+        <button type="button" onclick="skipAudio(10)" class="ctrl-btn btn-10s" title="Forward 10s" aria-label="10 விநாடிகள் முன்னோக்கிச் செல்" id="forward10Btn" tabindex="0">
+          10s ⏭
+        </button>
+
+      </div>
+    </div>
     
     <!-- Shortcut Keys List -->
     <div class="shortcut-box">
@@ -223,8 +326,8 @@
           <span id="toggleIcon">▼</span>
         </button>
 
-        <!-- Read Speaker Icon Button -->
-        <button type="button" onclick="toggleShortcutAudio()" title="Read" aria-label="ஷார்ட்கட் கீஸைக் கேளுங்கள்" style="background: none; border: none; cursor: pointer; font-size: 18px; padding: 0 5px; margin-left: 10px;" id="readShortcutBtn">
+        <!-- Speaker Icon Button -->
+        <button type="button" onclick="handleSpeakerClick()" title="Read Shortcuts Audio" aria-label="ஷார்ட்கட் கீஸைக் கேளுங்கள்" style="background: none; border: none; cursor: pointer; font-size: 20px; padding: 0 5px; margin-left: 10px;" id="readShortcutBtn" tabindex="0">
           🔊
         </button>
       </div>
@@ -343,10 +446,29 @@
     <br>
     <br>
     <div id="ContactSection">
-      <labe style="margin: auto; color: aqua; font-family: 'Times New Roman', Times, serif;">For Any Further Issuses or You want me to tell something use this box</labe>
+      <label style="margin: auto; color: aqua; font-family: 'Times New Roman', Times, serif;">For Any Further Issuses or You want me to tell something use this box</label>
       <div style="text-align: right; margin-top: 10px;">
         <button type="button" class="feedback-btn" onclick="openFeedbackModal()">Comments / Feedback</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Shortcut Help Info Modal Popup (Line by Line Accessible & Focus Trapped) -->
+  <div id="shortcutInfoModal" class="info-modal-overlay">
+    <div class="info-modal-box" role="dialog" aria-labelledby="modalTitle" aria-modal="true" tabindex="-1">
+      <h3 id="modalTitle" tabindex="0">Audio Player Shortcut Guide</h3>
+      
+      <p tabindex="0">Welcome. This is the list of controls to manage your audio.</p>
+      <p tabindex="0">Use Control + Shift + Space to play and pause this audio.</p>
+      <p tabindex="0">Use Control + Shift to rewind. One tap will rewind five seconds, and two taps will rewind ten seconds.</p>
+      <p tabindex="0">Use Control + Alt to forward. One tap will forward five seconds, and two taps will forward ten seconds.</p>
+      
+      <div class="checkbox-container">
+        <input type="checkbox" id="dontShowAgainCheckbox" tabindex="0">
+        <label for="dontShowAgainCheckbox">Don't show this dialog again</label>
+      </div>
+
+      <button type="button" class="close-info-btn" id="closeInfoBtn" onclick="closeShortcutInfoModal()" tabindex="0">Close</button>
     </div>
   </div>
 
@@ -375,27 +497,182 @@
     let currentAudio = null;
     let autoPreviewTimer = null;
     let lastPlayedSignature = "";
+    
+    let lastShiftPressTime = 0;
+    let shiftPressCount = 0;
 
-    const voiceCounts = {
-      'en-US': { 'Female': 3, 'Male': 3 },
-      'hi-IN': { 'Female': 2, 'Male': 1 },
-      'es-ES': { 'Female': 2, 'Male': 2 },
-      'fr-FR': { 'Female': 2, 'Male': 2 },
-      'de-DE': { 'Female': 2, 'Male': 2 },
-      'ta-IN': { 'Female': 1, 'Male': 1 },
-      'ta-LK': { 'Female': 1, 'Male': 1 },
-      'ta-SG': { 'Female': 1, 'Male': 1 },
-      'en-IN': { 'Female': 1, 'Male': 1 }
-    };
+    let lastAltPressTime = 0;
+    let altPressCount = 0;
 
-    function toggleShortcutAudio() {
-      const audio = document.getElementById('shortcutAudio');
-      if (audio.paused) {
-        audio.play();
+    /* Speaker Icon Click / Enter - Check LocalStorage, Show Modal or Audio Directly */
+    function handleSpeakerClick() {
+      const dontShow = localStorage.getItem('tts_hide_shortcut_modal');
+      
+      if (dontShow === 'true') {
+        const controls = document.getElementById('audioControlsContainer');
+        controls.style.display = 'block';
+        toggleShortcutAudio();
+        document.getElementById('mainPlayPauseBtn').focus();
       } else {
-        audio.pause();
+        const modal = document.getElementById('shortcutInfoModal');
+        modal.style.display = 'flex';
+        
+        // Focus on the modal title so screen reader starts reading line by line
+        setTimeout(() => {
+          document.getElementById('modalTitle').focus();
+        }, 100);
       }
     }
+
+    /* Strict Focus Trap inside Info Modal */
+    document.addEventListener('keydown', function(event) {
+      const modal = document.getElementById('shortcutInfoModal');
+      if (modal.style.display === 'flex') {
+        if (event.key === 'Tab') {
+          const focusableElements = modal.querySelectorAll('h3, p, input[type="checkbox"], button');
+          const firstElement = focusableElements[0];
+          const lastElement = focusableElements[focusableElements.length - 1];
+
+          if (event.shiftKey) { // Shift + Tab
+            if (document.activeElement === firstElement) {
+              event.preventDefault();
+              lastElement.focus();
+            }
+          } else { // Tab
+            if (document.activeElement === lastElement) {
+              event.preventDefault();
+              firstElement.focus();
+            }
+          }
+        }
+        else if (event.key === 'Escape') {
+          closeShortcutInfoModal();
+        }
+      }
+    });
+
+    /* Close Info Modal and open Audio Player Controls */
+    function closeShortcutInfoModal() {
+      const checkbox = document.getElementById('dontShowAgainCheckbox');
+      if (checkbox.checked) {
+        localStorage.setItem('tts_hide_shortcut_modal', 'true');
+      }
+
+      document.getElementById('shortcutInfoModal').style.display = 'none';
+
+      const controls = document.getElementById('audioControlsContainer');
+      controls.style.display = 'block';
+      toggleShortcutAudio();
+      document.getElementById('mainPlayPauseBtn').focus();
+    }
+
+    /* Play / Pause Toggle Logic with Color Updates */
+    function toggleShortcutAudio() {
+      const audio = document.getElementById('shortcutAudio');
+      const icon = document.getElementById('playPauseIcon');
+      const btn = document.getElementById('mainPlayPauseBtn');
+
+      if (audio.paused) {
+        audio.play();
+        icon.textContent = '⏸ Pause';
+        btn.className = 'ctrl-btn btn-pause';
+      } else {
+        audio.pause();
+        icon.textContent = '▶ Play';
+        btn.className = 'ctrl-btn btn-play';
+      }
+    }
+
+    /* Skip Forward / Rewind Logic */
+    function skipAudio(seconds) {
+      const audio = document.getElementById('shortcutAudio');
+      if (audio) {
+        audio.currentTime += seconds;
+      }
+    }
+
+    /* STRICT SCOPED KEYBOARD LISTENER (Inside Audio Controls Room Only) */
+    document.addEventListener('DOMContentLoaded', function() {
+      const audio = document.getElementById('shortcutAudio');
+      if (audio) {
+        audio.onended = function() {
+          const icon = document.getElementById('playPauseIcon');
+          const btn = document.getElementById('mainPlayPauseBtn');
+          if (icon && btn) {
+            icon.textContent = '▶ Play';
+            btn.className = 'ctrl-btn btn-play';
+          }
+        };
+      }
+
+      const audioButtons = ['rewind10Btn', 'rewind5Btn', 'mainPlayPauseBtn', 'forward5Btn', 'forward10Btn'];
+      
+      audioButtons.forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) {
+          btn.addEventListener('keydown', function(event) {
+            const activeEl = document.activeElement;
+            const isInsideAudioRoom = audioButtons.includes(activeEl.id);
+
+            if (isInsideAudioRoom) {
+              if (event.ctrlKey && event.shiftKey && !event.altKey && (event.code === 'Space' || event.key === ' ')) {
+                event.preventDefault();
+                event.stopPropagation();
+                toggleShortcutAudio();
+              }
+            }
+          });
+
+          btn.addEventListener('keyup', function(event) {
+            const activeEl = document.activeElement;
+            const isInsideAudioRoom = audioButtons.includes(activeEl.id);
+
+            if (isInsideAudioRoom && event.ctrlKey) {
+              const currentTime = new Date().getTime();
+
+              if (event.key === 'Shift') {
+                event.preventDefault();
+                event.stopPropagation();
+                if (currentTime - lastShiftPressTime < 400) {
+                  shiftPressCount++;
+                } else {
+                  shiftPressCount = 1;
+                }
+                lastShiftPressTime = currentTime;
+
+                setTimeout(() => {
+                  if (shiftPressCount === 1) {
+                    skipAudio(-5);
+                  } else if (shiftPressCount >= 2) {
+                    skipAudio(-10);
+                  }
+                  shiftPressCount = 0;
+                }, 400);
+              }
+              else if (event.key === 'Alt') {
+                event.preventDefault();
+                event.stopPropagation();
+                if (currentTime - lastAltPressTime < 400) {
+                  altPressCount++;
+                } else {
+                  altPressCount = 1;
+                }
+                lastAltPressTime = currentTime;
+
+                setTimeout(() => {
+                  if (altPressCount === 1) {
+                    skipAudio(5);
+                  } else if (altPressCount >= 2) {
+                    skipAudio(10);
+                  }
+                  altPressCount = 0;
+                }, 400);
+              }
+            }
+          });
+        }
+      });
+    });
 
     function closeSplash() {
       const splash = document.getElementById('splashOverlay');
@@ -721,7 +998,7 @@
       }
       if (event.ctrlKey && event.shiftKey && (event.key === 'g' || event.key === 'G')) {
         event.preventDefault();
-        const downloadLink = document.getElementById('downloadLink');
+        const downloadBtn = document.getElementById('downloadLink');
         if (document.getElementById('resultSection').style.display !== 'none') {
           downloadLink.click();
         }
