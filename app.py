@@ -1,7 +1,8 @@
 import asyncio
 from datetime import datetime, timedelta
 import os
-import edge_tts  # edge_pss நீக்கப்பட்டுவிட்டது
+import uuid
+import edge_tts  
 from flask import Flask, redirect, render_template, request, send_file, url_for
 import psycopg2
 import psycopg2.extras
@@ -11,7 +12,7 @@ app = Flask(__name__)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Render Internal Database URL
-DATABASE_URL = "postgresql://tts_feedback_database_user:wJJTpPaOBBVBCg1RsNtqXFuz9oX6wJ9c@dpg-dbhdsno8v5cc7387f1s0-a/tts_feedback_database"
+DATABASE_URL = "postgresql://tts_feedback_database_user:wJJTpPaOBBVBCg1RsNtqXFuz9oX6wJ9c@dpg-dbhdsno8v5cc7387f1s0-a.oregon-postgres.render.com/tts_feedback_database"
 
 
 # டேட்டாபேஸ் மற்றும் டேபிளை உருவாக்கும் பங்க்ஷன்
@@ -118,12 +119,9 @@ def get_selected_voice(lang, gender, voice_index=0):
 
 @app.route("/convert", methods=["POST"])
 def convert():
-  output_file = os.path.join(BASE_DIR, "output.mp3")
-  if os.path.exists(output_file):
-    try:
-      os.remove(output_file)
-    except:
-      pass
+  # ஒவ்வொரு முறை கன்வெர்ட் செய்யும்போது யுனிக் ஃபைல் நேம் பயன்படுத்தப்படும்
+  output_filename = f"output_{uuid.uuid4().hex}.mp3"
+  output_file = os.path.join(BASE_DIR, output_filename)
 
   try:
     text = request.form.get("text", "")
@@ -158,7 +156,7 @@ def preview():
 
     sample_texts = {
         "ta": "வணக்கம், இது குரல் சோதனை.",
-        "hi": "नमस्ते, यह आवाज़ का परीक्षण है।",
+        "hi": "नमस्ते, यह आवाज़ का परीक्षण है。",
         "es": "Hola, esta es una prueba de voz.",
         "fr": "Bonjour, ceci est un test vocal.",
         "de": "Hallo, dies ist ein Sprachtest.",
@@ -179,13 +177,10 @@ def preview():
     text = sample_texts.get(prefix, "Hello, this is a voice sample preview.")
 
     selected_voice = get_selected_voice(lang, gender, voice_index)
-    preview_file = os.path.join(BASE_DIR, "preview.mp3")
-
-    if os.path.exists(preview_file):
-      try:
-        os.remove(preview_file)
-      except:
-        pass
+    
+    # ஒவ்வொரு பிரிவ்யூவுக்கும் யுனிக் ஃபைல் நேம் கொடுக்கப்படுகிறது
+    preview_filename = f"preview_{uuid.uuid4().hex}.mp3"
+    preview_file = os.path.join(BASE_DIR, preview_filename)
 
     async def create_preview():
       communicate = edge_tts.Communicate(
@@ -240,8 +235,6 @@ def view_feedback():
 
   # பாஸ்வேர்ட் சரிபார்ப்பு
   if password != ADMIN_PASSWORD:
-    # முதல் முறை லாகின் செய்யும்போது அல்லது தவறுதலாக இருந்தால் லாகின் பேஜ் காட்டப்படும்
-    # GET அல்லது POST-ல் தவறான பாஸ்வேர்ட் வந்தால் error காட்டலாம்
     error = "Wrong Password!" if request.method == "POST" else ""
     return render_template(
         "view_feedback.html", logged_in=False, error=error, content=""
@@ -267,7 +260,9 @@ def view_feedback():
       time_filter = request.form.get("time_filter")
       now = datetime.now()
 
-      if time_filter == "1_hour":
+      if time_filter == "30_minutes":
+        limit_time = now - timedelta(minutes=30)
+      elif time_filter == "1_hour":
         limit_time = now - timedelta(hours=1)
       elif time_filter == "24_hours":
         limit_time = now - timedelta(days=1)
@@ -275,6 +270,8 @@ def view_feedback():
         limit_time = now - timedelta(days=7)
       elif time_filter == "30_days":
         limit_time = now - timedelta(days=30)
+      elif time_filter == "60_days":
+        limit_time = now - timedelta(days=60)
       else:
         limit_time = None
 
