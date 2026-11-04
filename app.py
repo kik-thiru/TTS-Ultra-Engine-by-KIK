@@ -230,7 +230,7 @@ def send_feedback():
 # மேம்படுத்தப்பட்ட அட்மின் டேஷ்போர்டு & டெலீட் கன்ட்ரோல்ஸ்
 @app.route("/view_feedback", methods=["GET", "POST"])
 def view_feedback():
-  ADMIN_PASSWORD = "KIK/comkge@15"
+  ADMIN_PASSWORD = "KIK-thiru/comkge@15"
   password = request.form.get("password") or request.args.get("password")
 
   # பாஸ்வேர்ட் சரிபார்ப்பு
