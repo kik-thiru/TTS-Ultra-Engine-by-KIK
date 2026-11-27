@@ -12,7 +12,7 @@ app = Flask(__name__)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Render Internal Database URL
-DATABASE_URL = "postgresql://postgres:[YOUR-DATABASE-PASSWORD]@db.nqfqelithbamsptpyuia.supabase.co:5432/postgres"
+DATABASE_URL = "postgresql://postgres:[KIK-thiru/comkge@15]@db.nqfqelithbamsptpyuia.supabase.co:5432/postgres"
 
 
 # டேட்டாபேஸ் மற்றும் டேபிளை உருவாக்கும் பங்க்ஷன்
